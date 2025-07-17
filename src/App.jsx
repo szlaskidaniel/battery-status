@@ -48,47 +48,11 @@ function BatteryStatus() {
 
   return (
     <div style={{ position: 'relative' }}>
-      <div className="battery-app">
-        
-        <div className="remaining mb-0">
-          {loading
-            ? '...'
-            : curr < 0
-              ? (() => {
-                  const socMin = 15;
-                  // kWh left to discharge
-                  const usableKWh = BATTERY_CAPACITY_KWH * (soc - socMin) / 100;
-                  // time in hours = kWh / (W / 1000)
-                  const hours = Math.abs(usableKWh / (power / 1000));
-                  const min = hours * 60;
-                  if (min > 120) {
-                    return `${hours.toFixed(1)} h remaining`;
-                  }
-                  return `${min.toFixed(0)} min remaining`;
-                })()
-              : ''}
-        </div>
-        {/* ETA below battery if remaining time is shown */}
-        {(!loading && curr < 0) && (() => {
-          const socMin = 15;
-          const usableKWh = BATTERY_CAPACITY_KWH * (soc - socMin) / 100;
-          const hours = Math.abs(usableKWh / (power / 1000));
-          const min = hours * 60;
-          if (min > 0) {
-            const eta = new Date(Date.now() + min * 60000);
-            const h = eta.getHours().toString().padStart(2, '0');
-            const m = eta.getMinutes().toString().padStart(2, '0');
-            return (
-              <div style={{ textAlign: 'center', fontSize: '0.8em', opacity: 0.7, marginBottom: 4 }}>
-                ETA: {h}:{m}
-              </div>
-            );
-          }
-          return null;
-        })()}
-      
-        <div className="battery-container flex items-center">
-          <div className="battery" style={{ position: 'relative' }}>
+      <div className="battery-app" style={{ marginTop: '24px' }}>
+               
+    
+        <div className="flex items-center" style={{ flexDirection: 'column' }}>
+          <div className="battery" style={{ position: 'relative', marginTop: '24px' }}>
             {/* Battery fill */}
             <div
               className="battery-fill"
@@ -109,29 +73,99 @@ function BatteryStatus() {
                 transition: 'width 0.8s cubic-bezier(0.4,0,0.2,1)',
               }}
             >
-              <span className="soc-label">
-                {soc}% {loading
-                  ? ''
-                  : curr > 0
-                    ? 'Charging'
-                    : curr === 0
-                      ? 'Idle'
-                      : 'Discharging'}
+              <span
+                className="soc-label"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5em',
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: 'max-content',
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  color: soc > 50 && soc < 80 ? '#222' : '#e6e3e3fa',
+                  textShadow: soc > 50 && soc < 80 ? 'none' : '0 2px 8px #000a',
+                  whiteSpace: 'nowrap',
+                  pointerEvents: 'none',
+                }}
+              >
+                <span>{soc}%</span>
+                <span style={{
+                  fontSize: '1.05rem',
+                  fontWeight: 500,
+                  opacity: 0.7,
+                  letterSpacing: '0.04em',
+                }}>
+                  {loading
+                    ? ''
+                    : curr > 0
+                      ? 'charging'
+                      : curr === 0
+                        ? 'idle'
+                        : 'discharging'}
+                </span>
               </span>
             </div>
           </div>
-            {/* Current and Voltage below battery */}
-        <div style={{ textAlign: 'center', marginTop: 0 }} className="text-xs" >
-          <span style={{ opacity: 0.6, marginRight: 8 }}>{volt} V</span>
-          <span style={{ opacity: 0.6 }}>{curr} A</span>
-        </div>
-        </div>
-        
-        <div className="battery-info">
-          <span>⚡ {power} W</span>
-      
+          {/* Current and Voltage below battery */}
+          <div className="text-xs text-center" >
+            <span style={{ opacity: 0.6, marginRight: 8 }}>{volt.toFixed(1)} V</span>
+            <span style={{ opacity: 0.6 }}>{curr.toFixed(1)} A</span>
+          </div>
         </div>
         
+        {/* Modern info bar for power, remaining, ETA */}
+        <div className="battery-info-bar" style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          gap: '1.5em',
+          margin: '16px 0 8px 0',
+          fontSize: '1rem',
+          fontWeight: 300,
+          letterSpacing: '0.02em',
+        }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, opacity: 0.85 }}>
+            <span style={{ fontSize: '1em' }}>⚡</span> {power} W
+          </span>
+          <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.7, fontSize: '0.9em', minWidth: '90px' }}>
+            <span>
+              {loading
+                ? '...'
+                : curr < 0
+                  ? (() => {
+                      const socMin = 15;
+                      const usableKWh = BATTERY_CAPACITY_KWH * (soc - socMin) / 100;
+                      const hours = Math.abs(usableKWh / (power / 1000));
+                      const min = hours * 60;
+                      if (min > 120) {
+                        return `${hours.toFixed(1)} h remaining`;
+                      }
+                      return `${min.toFixed(0)} min remaining`;
+                    })()
+                  : ''}
+            </span>
+            <span>
+              {(!loading && curr < 0) && (() => {
+                const socMin = 15;
+                const usableKWh = BATTERY_CAPACITY_KWH * (soc - socMin) / 100;
+                const hours = Math.abs(usableKWh / (power / 1000));
+                const min = hours * 60;
+                if (min > 0) {
+                  const eta = new Date(Date.now() + min * 60000);
+                  const h = eta.getHours().toString().padStart(2, '0');
+                  const m = eta.getMinutes().toString().padStart(2, '0');
+                  return `ETA: ${h}:${m}`;
+                }
+                return '';
+              })()}
+            </span>
+          </span>
+        </div>
         <div className="footer">Pylontech Battery Force H2 Status</div>
       </div>
       {/* Circular countdown indicator - top right of battery-app */}
@@ -141,7 +175,7 @@ function BatteryStatus() {
           top: 8,
           right: 8,
           zIndex: 10,
-          pointerEvents: 'none',
+          pointerEvents: 'none',          
         }}
       >
         <svg width="32" height="32" viewBox="0 0 32 32">

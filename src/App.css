@@ -5,7 +5,7 @@ body {
   font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
   margin: 0;
   min-height: 100vh;
-  display: flex;
+  display: flex;  
   flex-direction: column;
   align-items: center;
 }
@@ -19,7 +19,7 @@ body {
   padding: 32px 24px 24px 24px;
   text-align: center;
   position: relative;
-  left: 50%;
+  left: 50%;  
   transform: translateX(-50%);
 }
 
@@ -52,7 +52,7 @@ body {
 }
 .battery-fill {
   height: 100%;
-  border-radius: 12px 0 0 12px;
+  border-radius: 12px 0 0 12px;  
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -67,10 +67,11 @@ body {
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -48%);
   margin: 0;
   white-space: nowrap;
   width: max-content;
+  pointer-events: none;
 }
 .battery-labels {
   display: flex;
