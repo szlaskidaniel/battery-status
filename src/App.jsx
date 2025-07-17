@@ -112,7 +112,7 @@ function BatteryStatus() {
             </div>
           </div>
           {/* Current and Voltage below battery */}
-          <div className="text-xs text-center" >
+          <div className="text-center" style={{ fontSize: '0.8rem', marginTop: '4px' }} >
             <span style={{ opacity: 0.6, marginRight: 8 }}>{volt.toFixed(1)} V</span>
             <span style={{ opacity: 0.6 }}>{curr.toFixed(1)} A</span>
           </div>
@@ -129,10 +129,13 @@ function BatteryStatus() {
           fontWeight: 300,
           letterSpacing: '0.02em',
         }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, opacity: 0.85 }}>
-            <span style={{ fontSize: '1em' }}>⚡</span> {power} W
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, opacity: 0.85, fontSize: '1.4em', marginTop: '6px' }}>
+            <span style={{ fontSize: '0.9em' }}>⚡</span>
+            {Math.abs(power) >= 1000
+              ? `${(power / 1000).toFixed(2)} kW`
+              : `${power} W`}
           </span>
-          <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.7, fontSize: '0.9em', minWidth: '90px' }}>
+          <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', opacity: 0.7, fontSize: '0.9em', minWidth: '90px' }}>
             <span>
               {loading
                 ? '...'
