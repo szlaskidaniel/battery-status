@@ -47,13 +47,20 @@ function BatteryStatus() {
     <div style={{ position: 'relative' }}>
       <div className="battery-app">
         
-        <div className="remaining">
+        <div className="remaining ">
           {loading
             ? '...'
-            : curr > 0
-              ? `${((100 - soc) * 60 / (power / volt)).toFixed(0)} min remaining`
+            : curr < 0
+              ? (() => {
+                  const min = Math.abs(((100 - soc) * 60 / (power / volt)));
+                  if (min > 120) {
+                    return `${(min / 60).toFixed(1)} h remaining`;
+                  }
+                  return `${min.toFixed(0)} min remaining`;
+                })()
               : ''}
         </div>
+      
         <div className="battery-container flex items-center">
           <div className="battery" style={{ position: 'relative' }}>
             {/* Battery fill */}
@@ -87,12 +94,18 @@ function BatteryStatus() {
               </span>
             </div>
           </div>
+            {/* Current and Voltage below battery */}
+        <div style={{ textAlign: 'center', marginTop: 0 }} className="text-xs" >
+          <span style={{ opacity: 0.6, marginRight: 8 }}>{volt} V</span>
+          <span style={{ opacity: 0.6 }}>{curr} A</span>
         </div>
+        </div>
+        
         <div className="battery-info">
           <span>⚡ {power} W</span>
-          <span>{volt} V</span>
-          <span>{curr} A</span>
+      
         </div>
+        
         <div className="footer">Pylontech Battery Force H2 Status</div>
       </div>
       {/* Circular countdown indicator - top right of battery-app */}
