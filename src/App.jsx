@@ -33,25 +33,44 @@ function BatteryStatus() {
   return (
     <div className="battery-app">
       <h2 className="charging">
-        {loading
-          ? '...'
-          : curr > 0
-            ? 'Charging'
-            : curr === 0
-              ? 'Idle'
-              : 'Discharging'}
+       Battery
       </h2>
       <div className="remaining">{loading ? '...' :   curr > 0 && `${((100-soc)*60/(power/volt)).toFixed(0)} min remaining`}</div>
       <div className="battery-container flex items-center">
-        <div className="battery">
-          <div className="battery-fill" style={{width: `${soc}%`}}>
-            <span className="soc-label">{soc}%</span>
+        <div className="battery" style={{position: 'relative'}}>
+          {/* Battery fill */}
+          <div
+            className="battery-fill"
+            style={{
+              width: `${soc}%`,
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              background:
+                soc >= 80
+                  ? 'linear-gradient(90deg, #4caf50 60%, #388e3c 100%)'
+                  : soc >= 50
+                  ? 'linear-gradient(90deg, #ffeb3b 60%, #fbc02d 100%)'
+                  : soc >= 20
+                  ? 'linear-gradient(90deg, #ff9800 60%, #f57c00 100%)'
+                  : 'linear-gradient(90deg, #f44336 60%, #b71c1c 100%)',
+            }}
+          >
+            <span className="soc-label">
+              {soc}% {loading
+                ? ''
+                : curr > 0
+                  ? 'Charging'
+                  : curr === 0
+                    ? 'Idle'
+                    : 'Discharging'}
+            </span>
           </div>
         </div>
-        <div className="flex  flex-auto battery-labels text-center ml-auto text-xs">
+        {/* <div className="battery-labels">
           <span>SOC %</span>
-         
-        </div>
+        </div> */}
       </div>
       <div className="battery-info">
         <span>⚡ {power} W</span>
