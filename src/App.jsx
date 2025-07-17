@@ -41,14 +41,12 @@ function BatteryStatus() {
   const power = data?.Power ?? 0;
 
   // SVG circle calculations
-  const radius = 26;
-  const circumference = 2 * Math.PI * radius;
-  const dashoffset = ((countdown / 15) * circumference).toString();
+  
 
   return (
     <div style={{ position: 'relative' }}>
       <div className="battery-app">
-        <h2 className="charging">Battery</h2>
+        
         <div className="remaining">
           {loading
             ? '...'
@@ -96,36 +94,36 @@ function BatteryStatus() {
         </div>
         <div className="footer">Pylontech Battery Force H2 Status</div>
       </div>
-      {/* Circular countdown indicator */}
+      {/* Circular countdown indicator - top right of battery-app */}
       <div
         style={{
-          position: 'fixed',
-          right: 24,
-          bottom: 24,
+          position: 'absolute',
+          top: 8,
+          right: 8,
           zIndex: 10,
           pointerEvents: 'none',
         }}
       >
-        <svg width="56" height="56" viewBox="0 0 56 56">
+        <svg width="32" height="32" viewBox="0 0 32 32">
           <circle
-            cx="28"
-            cy="28"
-            r={radius}
+            cx="16"
+            cy="16"
+            r={12}
             fill="none"
             stroke="#fff"
             strokeOpacity="0.08"
-            strokeWidth="4"
+            strokeWidth="2"
           />
           <circle
-            cx="28"
-            cy="28"
-            r={radius}
+            cx="16"
+            cy="16"
+            r={12}
             fill="none"
             stroke="#fff"
             strokeOpacity="0.25"
-            strokeWidth="4"
-            strokeDasharray={circumference.toString()}
-            strokeDashoffset={dashoffset}
+            strokeWidth="2"
+            strokeDasharray={(2 * Math.PI * 12).toString()}
+            strokeDashoffset={((countdown / 15) * (2 * Math.PI * 12)).toString()}
             style={{
               transition: 'stroke-dashoffset 1s linear',
               transform: 'rotate(-90deg)',
@@ -133,10 +131,10 @@ function BatteryStatus() {
             }}
           />
           <text
-            x="28"
-            y="33"
+            x="16"
+            y="20"
             textAnchor="middle"
-            fontSize="13"
+            fontSize="9"
             fill="#fff"
             opacity="0.5"
             fontFamily="inherit"
