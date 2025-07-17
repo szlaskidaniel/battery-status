@@ -40,6 +40,9 @@ function BatteryStatus() {
   const curr = data?.Curr ?? 0;
   const power = data?.Power ?? 0;
 
+  // Battery constants
+  const BATTERY_CAPACITY_KWH = 14.2;
+
   // SVG circle calculations
   
 
@@ -47,19 +50,42 @@ function BatteryStatus() {
     <div style={{ position: 'relative' }}>
       <div className="battery-app">
         
-        <div className="remaining ">
+        <div className="remaining mb-0">
           {loading
             ? '...'
             : curr < 0
               ? (() => {
-                  const min = Math.abs(((100 - soc) * 60 / (power / volt)));
+                  const socMin = 15;
+                  // kWh left to discharge
+                  const usableKWh = BATTERY_CAPACITY_KWH * (soc - socMin) / 100;
+                  // time in hours = kWh / (W / 1000)
+                  const hours = Math.abs(usableKWh / (power / 1000));
+                  const min = hours * 60;
                   if (min > 120) {
-                    return `${(min / 60).toFixed(1)} h remaining`;
+                    return `${hours.toFixed(1)} h remaining`;
                   }
                   return `${min.toFixed(0)} min remaining`;
                 })()
               : ''}
         </div>
+        {/* ETA below battery if remaining time is shown */}
+        {(!loading && curr < 0) && (() => {
+          const socMin = 15;
+          const usableKWh = BATTERY_CAPACITY_KWH * (soc - socMin) / 100;
+          const hours = Math.abs(usableKWh / (power / 1000));
+          const min = hours * 60;
+          if (min > 0) {
+            const eta = new Date(Date.now() + min * 60000);
+            const h = eta.getHours().toString().padStart(2, '0');
+            const m = eta.getMinutes().toString().padStart(2, '0');
+            return (
+              <div style={{ textAlign: 'center', fontSize: '0.8em', opacity: 0.7, marginBottom: 4 }}>
+                ETA: {h}:{m}
+              </div>
+            );
+          }
+          return null;
+        })()}
       
         <div className="battery-container flex items-center">
           <div className="battery" style={{ position: 'relative' }}>
