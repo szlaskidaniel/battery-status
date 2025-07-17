@@ -21,63 +21,130 @@ function BatteryStatus() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 15 * 60 * 1000);
+    const interval = setInterval(fetchData, 15 * 1000); // 15 seconds
     return () => clearInterval(interval);
   }, []);
+
+  // Countdown state for refresh indicator
+  const [countdown, setCountdown] = useState(15); // seconds
+  useEffect(() => {
+    setCountdown(15);
+    const timer = setInterval(() => {
+      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [data]);
 
   const soc = data?.SOC ?? 0;
   const volt = data?.Volt ?? 0;
   const curr = data?.Curr ?? 0;
   const power = data?.Power ?? 0;
 
+  // SVG circle calculations
+  const radius = 26;
+  const circumference = 2 * Math.PI * radius;
+  const dashoffset = ((countdown / 15) * circumference).toString();
+
   return (
-    <div className="battery-app">
-      <h2 className="charging">
-       Battery
-      </h2>
-      <div className="remaining">{loading ? '...' :   curr > 0 && `${((100-soc)*60/(power/volt)).toFixed(0)} min remaining`}</div>
-      <div className="battery-container flex items-center">
-        <div className="battery" style={{position: 'relative'}}>
-          {/* Battery fill */}
-          <div
-            className="battery-fill"
-            style={{
-              width: `${soc}%`,
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              bottom: 0,
-              background:
-                soc >= 80
-                  ? 'linear-gradient(90deg, #4caf50 60%, #388e3c 100%)'
-                  : soc >= 50
-                  ? 'linear-gradient(90deg, #ffeb3b 60%, #fbc02d 100%)'
-                  : soc >= 20
-                  ? 'linear-gradient(90deg, #ff9800 60%, #f57c00 100%)'
-                  : 'linear-gradient(90deg, #f44336 60%, #b71c1c 100%)',
-            }}
-          >
-            <span className="soc-label">
-              {soc}% {loading
-                ? ''
-                : curr > 0
-                  ? 'Charging'
-                  : curr === 0
-                    ? 'Idle'
-                    : 'Discharging'}
-            </span>
+    <div style={{ position: 'relative' }}>
+      <div className="battery-app">
+        <h2 className="charging">Battery</h2>
+        <div className="remaining">
+          {loading
+            ? '...'
+            : curr > 0
+              ? `${((100 - soc) * 60 / (power / volt)).toFixed(0)} min remaining`
+              : ''}
+        </div>
+        <div className="battery-container flex items-center">
+          <div className="battery" style={{ position: 'relative' }}>
+            {/* Battery fill */}
+            <div
+              className="battery-fill"
+              style={{
+                width: `${soc}%`,
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                bottom: 0,
+                background:
+                  soc >= 80
+                    ? 'linear-gradient(90deg, #4caf50 60%, #388e3c 100%)'
+                    : soc >= 50
+                    ? 'linear-gradient(90deg, #ffeb3b 60%, #fbc02d 100%)'
+                    : soc >= 20
+                    ? 'linear-gradient(90deg, #ff9800 60%, #f57c00 100%)'
+                    : 'linear-gradient(90deg, #f44336 60%, #b71c1c 100%)',
+              }}
+            >
+              <span className="soc-label">
+                {soc}% {loading
+                  ? ''
+                  : curr > 0
+                    ? 'Charging'
+                    : curr === 0
+                      ? 'Idle'
+                      : 'Discharging'}
+              </span>
+            </div>
           </div>
         </div>
-        {/* <div className="battery-labels">
-          <span>SOC %</span>
-        </div> */}
+        <div className="battery-info">
+          <span>⚡ {power} W</span>
+          <span>{volt} V</span>
+          <span>{curr} A</span>
+        </div>
+        <div className="footer">Pylontech Battery Force H2 Status</div>
       </div>
-      <div className="battery-info">
-        <span>⚡ {power} W</span>
-        <span>{volt} V</span>
-        <span>{curr} A</span>
+      {/* Circular countdown indicator */}
+      <div
+        style={{
+          position: 'fixed',
+          right: 24,
+          bottom: 24,
+          zIndex: 10,
+          pointerEvents: 'none',
+        }}
+      >
+        <svg width="56" height="56" viewBox="0 0 56 56">
+          <circle
+            cx="28"
+            cy="28"
+            r={radius}
+            fill="none"
+            stroke="#fff"
+            strokeOpacity="0.08"
+            strokeWidth="4"
+          />
+          <circle
+            cx="28"
+            cy="28"
+            r={radius}
+            fill="none"
+            stroke="#fff"
+            strokeOpacity="0.25"
+            strokeWidth="4"
+            strokeDasharray={circumference.toString()}
+            strokeDashoffset={dashoffset}
+            style={{
+              transition: 'stroke-dashoffset 1s linear',
+              transform: 'rotate(-90deg)',
+              transformOrigin: 'center',
+            }}
+          />
+          <text
+            x="28"
+            y="33"
+            textAnchor="middle"
+            fontSize="13"
+            fill="#fff"
+            opacity="0.5"
+            fontFamily="inherit"
+          >
+            {countdown}s
+          </text>
+        </svg>
       </div>
-      <div className="footer">Pylontech Battery Force H2 Status</div>
     </div>
   );
 }
