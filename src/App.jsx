@@ -73,6 +73,7 @@ function BatteryStatus() {
                     : soc >= 20
                     ? 'linear-gradient(90deg, #ff9800 60%, #f57c00 100%)'
                     : 'linear-gradient(90deg, #f44336 60%, #b71c1c 100%)',
+                transition: 'width 0.8s cubic-bezier(0.4,0,0.2,1)',
               }}
             >
               <span className="soc-label">
