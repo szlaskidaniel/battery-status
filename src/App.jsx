@@ -12,7 +12,8 @@ function BatteryStatus() {
     try {
       const res = await fetch(DATA_URL);
       let json = await res.json();
-      
+      //json.Curr = -1000      
+      //json.Timestamp = new Date(Date.now() - 15 * 60 * 1000).toISOString();
 
       setData(json);
     } catch {
@@ -38,6 +39,19 @@ function BatteryStatus() {
   }, [data]);
 
   const soc = data?.SOC ?? 0;
+  // Offline logic
+  let isOffline = false;
+  let timestampAgeSec = null;
+  if (!data || !data.Timestamp) {
+    isOffline = true;
+  } else {
+    const now = Date.now();
+    const updated = Date.parse(data.Timestamp);
+    timestampAgeSec = Math.floor((now - updated) / 1000);
+    if (timestampAgeSec > 180) {
+      isOffline = true;
+    }
+  }
   const volt = data?.Volt ?? 0;
   const curr = data?.Curr ?? 0;
   const power = data?.Power ?? 0;
@@ -56,7 +70,7 @@ function BatteryStatus() {
         <div className="flex items-center" style={{ flexDirection: 'column' }}>
           <div className="battery" style={{
             position: 'relative',
-            marginTop: '12px',
+            marginTop: '8px',
             width: '220px',
             height: '64px',
             borderRadius: '18px',
@@ -68,24 +82,25 @@ function BatteryStatus() {
             alignItems: 'center',
             justifyContent: 'flex-start',
           }}>
-            {/* Battery fill */}
+            {/* Battery fill or empty if offline */}
             <div
               className="battery-fill"
               style={{
                 height: 'calc(100% - 8px)',
-                width: `calc(${soc}% - 8px)`,
+                width: isOffline ? '0%' : `calc(${soc}% - 8px)`,
                 marginLeft: '4px',
                 marginTop: '4px',
                 borderRadius: '14px',
-                background:
-                  soc >= 75
+                background: isOffline
+                  ? 'none'
+                  : soc >= 75
                     ? 'linear-gradient(90deg, #4caf50 60%, #388e3c 100%)'
                     : soc >= 50
                     ? 'linear-gradient(90deg, #ffeb3b 60%, #fbc02d 100%)'
                     : soc >= 25
                     ? 'linear-gradient(90deg, #ff9800 60%, #f57c00 100%)'
                     : 'linear-gradient(90deg, #f44336 60%, #b71c1c 100%)',
-                boxShadow: '0 2px 12px 0 #0006',
+                boxShadow: isOffline ? 'none' : '0 2px 12px 0 #0006',
                 transition: 'width 0.8s cubic-bezier(0.4,0,0.2,1)',
                 position: 'absolute',
                 left: 0,
@@ -109,51 +124,97 @@ function BatteryStatus() {
               zIndex: 3,
             }} />
             {/* Always visible SOC label, absolutely centered */}
-            <span
-              className="soc-label"
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'absolute',
-                left: '50%',
-                top: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: 'max-content',
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                color: soc > 50 && soc < 80 ? '#222' : '#e6e3e3fa',
-                textShadow: soc > 50 && soc < 80 ? 'none' : '0 2px 8px #000a',
-                whiteSpace: 'nowrap',
-                pointerEvents: 'none',
-                zIndex: 4,
-              }}
-            >
-              <span style={{ fontSize: '1.5rem', fontWeight: 'bold', lineHeight: 1 }}>{soc}%</span>
-              <span style={{
-                fontSize: '0.85rem',
-                fontWeight: 400,
-                opacity: 0.45,
-                letterSpacing: '0.04em',
-                marginTop: '2px',
-                textTransform: 'lowercase',
-              }}>
-                {loading
-                  ? ''
-                  : curr > 0
-                    ? 'charging'
-                    : curr === 0
-                      ? 'idle'
-                      : 'discharging'}
+            {/* SOC label or Offline warning */}
+            {isOffline ? (
+              <span
+                style={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '1.3rem',
+                  fontWeight: 600,
+                  color: '#ff9800',
+                  padding: '6px 18px',
+                  zIndex: 10,
+                  
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Offline
               </span>
-            </span>
+            ) : (
+              <span
+                className="soc-label"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: 'max-content',
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  color: soc > 50 && soc < 80 ? '#222' : '#e6e3e3fa',
+                  textShadow: soc > 50 && soc < 80 ? 'none' : '0 2px 8px #000a',
+                  whiteSpace: 'nowrap',
+                  pointerEvents: 'none',
+                  zIndex: 4,
+                }}
+              >
+                <span style={{ fontSize: '1.5rem', fontWeight: 'bold', lineHeight: 1 }}>{soc}%</span>
+                <span style={{
+                  fontSize: '0.85rem',
+                  fontWeight: 400,
+                  opacity: 0.45,
+                  letterSpacing: '0.04em',
+                  marginTop: '2px',
+                  textTransform: 'lowercase',
+                }}>
+                  {loading
+                    ? ''
+                    : curr > 0
+                      ? 'charging'
+                      : curr === 0
+                        ? 'idle'
+                        : 'discharging'}
+                </span>
+              </span>
+            )}
           </div>
           {/* Current and Voltage below battery */}
           <div className="text-center" style={{ fontSize: '0.8rem', marginTop: '4px' }} >
-            <span style={{ opacity: 0.6, marginRight: 8 }}>{volt.toFixed(1)} V</span>
-            <span style={{ opacity: 0.6 }}>{curr.toFixed(1)} A</span>
+            <span style={{ opacity: 0.6, marginRight: 8 }}>{isOffline ? '--' : volt.toFixed(1)} V</span>
+            <span style={{ opacity: 0.6 }}>{isOffline ? '--' : curr.toFixed(1)} A</span>
           </div>
+          {/* Centered power/ETA/remaining display below battery */}
+          {!isOffline && (
+            <div style={{
+              textAlign: 'center',
+              fontSize: '1.4em',
+              fontWeight: 400,
+              marginTop: '16px',
+              color: curr >= 0 ? '#4caf50' : '#fbc02d',
+              opacity: 0.85,
+              letterSpacing: '0.04em',
+              minHeight: '1.2em',
+            }}>
+              {curr >= 0
+                ? `+${Math.abs(power) >= 1000
+                    ? `${(power / 1000).toFixed(2)} kW`
+                    : `${power} W`}`
+                : (() => {
+                    let powerStr = `-${Math.abs(power) >= 1000
+                      ? `${(Math.abs(power) / 1000).toFixed(2)} kW`
+                      : `${Math.abs(power)} W`}`;
+                    return powerStr;
+                  })()
+              }
+            </div>
+          )}
         </div>
         
         {/* Modern info bar for power, remaining, ETA */}
@@ -166,48 +227,36 @@ function BatteryStatus() {
           fontSize: '1rem',
           fontWeight: 300,
           letterSpacing: '0.02em',
-          marginBottom: '64px',
+          
         }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, opacity: 0.85, fontSize: '1.4em', marginTop: '6px' }}>
-            <span style={{ fontSize: '0.9em' }}>⚡</span>
-            {Math.abs(power) >= 1000
-              ? `${(power / 1000).toFixed(2)} kW`
-              : `${power} W`}
-          </span>
-          <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', opacity: 0.7, fontSize: '0.9em', minWidth: '90px' }}>
-            <span>
-              {loading
-                ? '...'
-                : curr < 0
-                  ? (() => {
-                      const socMin = 15;
-                      const usableKWh = BATTERY_CAPACITY_KWH * (soc - socMin) / 100;
-                      const hours = Math.abs(usableKWh / (power / 1000));
-                      const min = hours * 60;
-                      if (min > 120) {
-                        return `${hours.toFixed(1)} h remaining`;
-                      }
-                      return `${min.toFixed(0)} min remaining`;
-                    })()
-                  : ''}
-            </span>
-            <span>
-              {(!loading && curr < 0) && (() => {
-                const socMin = 15;
-                const usableKWh = BATTERY_CAPACITY_KWH * (soc - socMin) / 100;
-                const hours = Math.abs(usableKWh / (power / 1000));
-                const min = hours * 60;
-                if (min > 0) {
-                  const eta = new Date(Date.now() + min * 60000);
-                  const h = eta.getHours().toString().padStart(2, '0');
-                  const m = eta.getMinutes().toString().padStart(2, '0');
-                  return `ETA: ${h}:${m}`;
-                }
-                return '';
-              })()}
-            </span>
-          </span>
         </div>
+        {/* Remaining/ETA info at the bottom, only when discharging */}
+        {(curr < 0) && (() => {
+          const socMin = 15;
+          const usableKWh = BATTERY_CAPACITY_KWH * (soc - socMin) / 100;
+          const hours = Math.abs(usableKWh / (power / 1000));
+          const min = hours * 60;
+          if (min > 0) {
+            const eta = new Date(Date.now() + min * 60000);
+            const h = eta.getHours().toString().padStart(2, '0');
+            const m = eta.getMinutes().toString().padStart(2, '0');
+            return (
+              <div style={{
+                width: '100%',
+                textAlign: 'center',
+                fontSize: '0.85em',
+                color: 'rgba(255, 180, 60, 0.85)',
+                paddingTop: '8px',
+                marginBottom: '16px',
+                fontWeight: 500,
+                letterSpacing: '0.02em',
+              }}>
+                {min > 120 ? `${hours.toFixed(1)} h` : `${min.toFixed(0)} min`} remaining · ETA: {h}:{m}
+              </div>
+            );
+          }
+          return null;
+        })()}
       
     </div>
     {/* Bottom bar with Last update (left) and circular timer (right) */}
@@ -225,7 +274,7 @@ function BatteryStatus() {
       pointerEvents: 'none',
       padding: '0 12px',
     }}>
-      <div style={{ textAlign: 'left' }}>
+      <div style={{ textAlign: 'left', marginLeft: '8px' }}>
         {data?.Timestamp ? (() => {
           const now = Date.now();
           const updated = Date.parse(data.Timestamp);
