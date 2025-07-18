@@ -54,16 +54,29 @@ function BatteryStatus() {
                <div className="footer">Pylontech Battery Force H2 Status</div>
     
         <div className="flex items-center" style={{ flexDirection: 'column' }}>
-          <div className="battery" style={{ position: 'relative', marginTop: '12px' }}>
+          <div className="battery" style={{
+            position: 'relative',
+            marginTop: '12px',
+            width: '220px',
+            height: '64px',
+            borderRadius: '18px',
+            border: '2.5px solid #222',
+            background: 'linear-gradient(180deg, #23272f 80%, #181a1f 100%)',
+            boxShadow: '0 4px 24px 0 #000a, 0 1px 0 #fff1 inset',
+            overflow: 'visible',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+          }}>
             {/* Battery fill */}
             <div
               className="battery-fill"
               style={{
-                width: `${soc}%`,
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
+                height: 'calc(100% - 8px)',
+                width: `calc(${soc}% - 8px)`,
+                marginLeft: '4px',
+                marginTop: '4px',
+                borderRadius: '14px',
                 background:
                   soc >= 75
                     ? 'linear-gradient(90deg, #4caf50 60%, #388e3c 100%)'
@@ -72,9 +85,29 @@ function BatteryStatus() {
                     : soc >= 25
                     ? 'linear-gradient(90deg, #ff9800 60%, #f57c00 100%)'
                     : 'linear-gradient(90deg, #f44336 60%, #b71c1c 100%)',
+                boxShadow: '0 2px 12px 0 #0006',
                 transition: 'width 0.8s cubic-bezier(0.4,0,0.2,1)',
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                bottom: 0,
+                zIndex: 1,
               }}
             />
+            {/* Battery cap/terminal */}
+            <div style={{
+              position: 'absolute',
+              right: '-14px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: '7px',
+              height: '22px',
+              borderRadius: '4px',
+              background: 'linear-gradient(180deg, #444 60%, #222 100%)',
+              border: '2px solid #222',
+              boxShadow: '0 2px 8px #0006',
+              zIndex: 3,
+            }} />
             {/* Always visible SOC label, absolutely centered */}
             <span
               className="soc-label"
@@ -94,7 +127,7 @@ function BatteryStatus() {
                 textShadow: soc > 50 && soc < 80 ? 'none' : '0 2px 8px #000a',
                 whiteSpace: 'nowrap',
                 pointerEvents: 'none',
-                zIndex: 2,
+                zIndex: 4,
               }}
             >
               <span style={{ fontSize: '1.5rem', fontWeight: 'bold', lineHeight: 1 }}>{soc}%</span>
