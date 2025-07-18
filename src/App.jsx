@@ -12,7 +12,7 @@ function BatteryStatus() {
     try {
       const res = await fetch(DATA_URL);
       let json = await res.json();
-      //json.Curr = -1000      
+      //json.Curr = 1000;
       //json.Timestamp = new Date(Date.now() - 15 * 60 * 1000).toISOString();
 
       setData(json);
@@ -191,18 +191,18 @@ function BatteryStatus() {
             <span style={{ opacity: 0.6 }}>{isOffline ? '--' : curr.toFixed(1)} A</span>
           </div>
           {/* Centered power/ETA/remaining display below battery */}
-          {!isOffline && (
+          {!isOffline && curr !== 0 && (
             <div style={{
               textAlign: 'center',
               fontSize: '1.4em',
               fontWeight: 400,
               marginTop: '16px',
-              color: curr >= 0 ? '#4caf50' : '#fbc02d',
+              color: curr > 0 ? '#4caf50' : '#fbc02d',
               opacity: 0.85,
               letterSpacing: '0.04em',
               minHeight: '1.2em',
             }}>
-              {curr >= 0
+              {curr > 0
                 ? `+${Math.abs(power) >= 1000
                     ? `${(power / 1000).toFixed(2)} kW`
                     : `${power} W`}`
