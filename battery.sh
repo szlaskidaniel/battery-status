@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 DEVICE="/dev/ttyUSB0"
 LOG="battery.log"
 
@@ -9,6 +10,12 @@ FILENAME="battery_data.json"
 REPO="szlaskidaniel/battery-status"
 FILE_PATH="status.json"
 
+
+# Check if device exists
+if [[ ! -e "$DEVICE" ]]; then
+    echo "Error: Device $DEVICE not found."
+    exit 1
+fi
 
 > "$LOG"  # Clear the log file
 
@@ -22,15 +29,30 @@ send_command() {
 }
 
 # Commands to run
-COMMANDS=("pwr")
-for cmd in "${COMMANDS[@]}"; do
-    send_command "$cmd"
+COMMANDS=("info" pwr")
+
+# Retry logic
+MAX_RETRIES=3
+RETRY_COUNT=0
+DATA_LINE=""
+
+while [[ $RETRY_COUNT -lt $MAX_RETRIES ]]; do
+    for cmd in "${COMMANDS[@]}"; do
+        send_command "$cmd"
+    done
+    DATA_LINE=$(grep -A1 "Volt.St" "$LOG" | tail -n1)
+    if [[ -n "$DATA_LINE" ]]; then
+        echo "Data found on attempt $((RETRY_COUNT + 1))" | tee -a "$LOG"
+        break
+    else
+        echo "No data line found in log on attempt $((RETRY_COUNT + 1)). Retrying..." | tee -a "$LOG"
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        sleep 2
+    fi
 done
 
-# Extract values
-DATA_LINE=$(grep -A1 "Volt.St" "$LOG" | tail -n1)
 if [[ -z "$DATA_LINE" ]]; then
-   echo "No data line found in log."
+    echo "No data line found in log after $MAX_RETRIES attempts."
     exit 1
 fi
 

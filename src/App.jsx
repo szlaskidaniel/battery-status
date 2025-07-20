@@ -124,26 +124,8 @@ function BatteryStatus() {
               zIndex: 3,
             }} />
             {/* Always visible SOC label, absolutely centered */}
-            {/* SOC label or Offline warning */}
-            {isOffline ? (
-              <span
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  fontSize: '1.3rem',
-                  fontWeight: 600,
-                  color: '#ff9800',
-                  padding: '6px 18px',
-                  zIndex: 10,
-                  
-                  letterSpacing: '0.04em',
-                }}
-              >
-                Offline
-              </span>
-            ) : (
+            {/* SOC label: always show percentage, grayed out if offline. If SOC not available, show Offline. */}
+            {typeof soc === 'number' && !isNaN(soc) ? (
               <span
                 className="soc-label"
                 style={{
@@ -158,11 +140,12 @@ function BatteryStatus() {
                   width: 'max-content',
                   fontSize: '1.5rem',
                   fontWeight: 'bold',
-                  color: soc > 50 && soc < 80 ? '#222' : '#e6e3e3fa',
-                  textShadow: soc > 50 && soc < 80 ? 'none' : '0 2px 8px #000a',
+                  color: isOffline ? '#888' : (soc > 50 && soc < 80 ? '#222' : '#e6e3e3fa'),
+                  textShadow: isOffline ? 'none' : (soc > 50 && soc < 80 ? 'none' : '0 2px 8px #000a'),
                   whiteSpace: 'nowrap',
                   pointerEvents: 'none',
                   zIndex: 4,
+                  opacity: isOffline ? 0.6 : 1,
                 }}
               >
                 <span style={{ fontSize: '1.5rem', fontWeight: 'bold', lineHeight: 1 }}>{soc}%</span>
@@ -182,6 +165,23 @@ function BatteryStatus() {
                         ? 'idle'
                         : 'discharging'}
                 </span>
+              </span>
+            ) : (
+              <span
+                style={{
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '1.3rem',
+                  fontWeight: 600,
+                  color: '#ff9800',
+                  padding: '6px 18px',
+                  zIndex: 10,
+                  letterSpacing: '0.04em',
+                }}
+              >
+                Offline
               </span>
             )}
           </div>
